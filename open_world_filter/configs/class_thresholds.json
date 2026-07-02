@@ -1,0 +1,80 @@
+{
+  "default": {
+    "similarity_threshold": 0.99,
+    "l2_distance_threshold": 0.003
+  },
+  "classes": {
+    "black_carp": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    },
+    "brown_trout": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    },
+    "carp": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.004
+    },
+    "chinese_labeo": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    },
+    "chinese_paddlefish": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.0032
+    },
+    "chinese_sucker": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.0030
+    },
+    "crucian_carp": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    },
+    "eastern_mosquitofish": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    },
+    "grass_carp": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    },
+    "guppies": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    },
+    "largemouth_bass": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    },
+    "mozambique_tilapia": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    },
+    "mud_carp": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    },
+    "rainbow_trout": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    },
+    "redeye_barbel": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    },
+    "schizothorax_fish": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    },
+    "serrated_barb": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.0035
+    },
+    "wuchang_bream": {
+      "similarity_threshold": 0.99,
+      "l2_distance_threshold": 0.003
+    }
+  }
+}

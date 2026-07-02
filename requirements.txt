@@ -1,0 +1,36 @@
+# Python dependencies for the visual modules of
+# "Bioinspired molecular–visual monitoring of invasive fishes".
+#
+# Tested with Python 3.10.
+#
+# PyTorch must be installed first, matching your CUDA runtime. The example
+# below targets CUDA 12.4 (see README for details):
+#   pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 \
+#       --index-url https://download.pytorch.org/whl/cu124
+torch==2.5.1
+torchvision==0.20.1
+torchaudio==2.5.1
+
+# Core vision / IO / utilities
+opencv-python
+pillow
+numpy            # code is compatible with NumPy 1.x and 2.x
+tqdm
+matplotlib
+pyyaml
+transformers
+
+# open_world_filter (classification / open-world screening) extras
+scikit-learn
+seaborn
+
+# Checkpoint download helper
+huggingface_hub
+
+# ---------------------------------------------------------------------------
+# External git dependencies (install manually; pin to a known-good commit
+# before public release to guarantee reproducibility):
+#   pip install git+https://github.com/IDEA-Research/Grounded-SAM-2.git
+#   pip install git+https://github.com/IDEA-Research/GroundingDINO.git
+#   pip install git+https://github.com/JonathonLuiten/TrackEval   # tracking evaluation only
+# ---------------------------------------------------------------------------

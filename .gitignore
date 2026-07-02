@@ -1,0 +1,62 @@
+# Byte-compiled / optimized / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+env/
+.conda/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Top-level runtime directories (created locally at run time; anchored to repo root)
+/data/
+/work_dirs/
+/checkpoints/
+profiler_traces/
+.smoke_tmp/
+
+# evidence_grounded_reasoner: keep the small JSON manifests under data/,
+# but never commit the bulky videos, released weights, checkpoints or eval dumps.
+evidence_grounded_reasoner/data/videos/
+evidence_grounded_reasoner/FishVL-4B-Thinking/
+**/ckpts/
+**/eval_outputs/
+
+# Model weights / large binaries
+*.pth
+*.pt
+*.onnx
+*.npy
+*.safetensors
+
+# Logs
+*.log
+
+# Removed from the public release
+CITATION.cff
+
+# Unpublished manuscript drafts — must NOT be committed to a public repository
+manuscripts/
+*.docx
+
+# AI-assisted internal working docs and assistant/tool files — not part of the public release
+OPEN_SOURCE_READINESS_REPORT.md
+COARSE_CLASSIFIER_MAINTENANCE_CHECKLIST.md
+plan/
+.claude/
+CLAUDE.md
+.codex/
+AGENTS.md
+.cursor/

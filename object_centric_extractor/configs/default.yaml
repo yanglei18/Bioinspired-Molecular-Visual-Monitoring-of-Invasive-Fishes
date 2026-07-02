@@ -1,0 +1,52 @@
+runtime:
+  sam2_checkpoint: "checkpoints/sam2.1_hiera_large.pt"
+  sam2_model_cfg: "configs/sam2.1/sam2.1_hiera_l.yaml"
+  grounding_model_id: "checkpoints/grounding-dino-base"
+
+data:
+  input_dir: "data/robotfish-data/video"
+  gt_label_json: "data/robotfish-data/label_rectified.json"
+
+outputs:
+  det_dir: "work_dirs/extraction_output/annotation_det"
+  mask_dir: "work_dirs/extraction_output/annotation_mask"
+  masked_image_dir: "work_dirs/extraction_output/masked_image"
+  masked_video_dir: "work_dirs/extraction_output/masked_video"
+  instance_image_dir: "work_dirs/extraction_output/instance_image"
+  instance_video_dir: "work_dirs/extraction_output/instance_video"
+
+detection:
+  text_prompt: "fish."
+  box_threshold: 0.30
+  iou_threshold: 0.65
+  min_edge_threshold: 100
+  step: 10
+
+crop:
+  min_tracking_frames: 10
+  padding: 50
+  min_size: 32
+  fixed_window: true
+  scale_factor: 1.0
+  percentile: 80
+  class_filter:
+    - fish
+    - carp
+
+pipeline:
+  do_tracking: true
+  do_cropping: true
+  cleanup_temp: true
+  enable_visualization: true
+
+evaluation:
+  pred_json_dir: "work_dirs/extraction_output/annotation_det"
+  gt_label_dir: "data/robotfish-data/label_rectified.json"
+  inference_json: null
+  work_dir: "work_dirs/extraction_output/kitti_eval_run"
+  tracker_name: "SAM2Detector"
+  frame_align_mode: "auto"
+  skip_detection: false
+  skip_tracking: false
+  no_plot: false
+  verbose: false

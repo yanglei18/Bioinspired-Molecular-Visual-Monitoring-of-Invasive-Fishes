@@ -1,0 +1,46 @@
+experiment:
+  name: "Invasive-S3-A"
+
+data:
+  train_dir: "data/fish-recognition-dataset/SuppExps/Invasive-S3-A/train"
+  val_dir: "data/fish-recognition-dataset/SuppExps/Invasive-S3-A/val"
+  reference_dir: "data/fish-recognition-dataset/SuppExps/Invasive-S3-A/train"
+
+outputs:
+  save_path: "work_dirs/open-world-filter-outputs/Invasive-S3-A"
+  evaluation_dir: "work_dirs/open-world-filter-outputs/Invasive-S3-A/evaluation"
+  model_path: "work_dirs/open-world-filter-outputs/Invasive-S3-A/fish_classifier_epoch_80.pth"
+
+training:
+  batch_size: 64
+  epochs: 100
+  lr: 1.0e-5
+  weight_decay: 1.0e-6
+  warmup_epochs: 10
+  gradient_clip: 0.5
+  backbone: "resnet50"
+  image_size: 224
+  num_workers: 2
+  use_class_pairs: true
+  profile_batches: 0
+  samples_per_class: 10000000
+  save_frequency: 10
+  val_frequency: 100
+  drop_last: true
+  model_path: null
+  radius_threshold_l2: 0.005
+  radius_weight_l2: 10.0
+  center_distance_threshold_l2: 20.0
+  center_distance_weight_l2: 10.0
+
+inference:
+  batch_size: 32
+  image_size: 224
+  num_workers: 4
+  similarity_threshold: 0.99
+  median_threshold: 0.99
+  variance_threshold: 0.01
+  l2_distance_threshold: 0.0065
+  max_samples_per_class: 5000
+  max_reference_per_class: 200
+  num_ensembles: 1

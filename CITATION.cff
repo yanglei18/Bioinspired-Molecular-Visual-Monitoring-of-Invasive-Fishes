@@ -1,0 +1,69 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated paper below."
+title: "Bioinspired molecular–visual monitoring of invasive fishes (visual modules)"
+abstract: >-
+  Code for the visual perception modules of the paper "Bioinspired
+  molecular–visual monitoring of invasive fishes": object-centric sequence
+  generation (detection, segmentation, tracking, instance export) and
+  open-world candidate filtering. The evidence-grounded vision-language
+  reasoning module and the molecular/eDNA pipeline are not included in this
+  repository.
+type: software
+authors:
+  - given-names: Lei
+    family-names: Li
+  - given-names: Yanyu
+    family-names: Li
+  - given-names: Lei
+    family-names: Yang
+  - given-names: Wenzhuo
+    family-names: Gao
+  - given-names: Boyang
+    family-names: Qin
+  - given-names: Kai
+    family-names: Wu
+  - given-names: Shengzhi
+    family-names: Wang
+  - given-names: Bo
+    family-names: Wang
+  - given-names: Yiyuan
+    family-names: Zhang
+  - given-names: Liuyong
+    family-names: Ding
+  - given-names: Jianshuo
+    family-names: Qian
+  - given-names: Shihan
+    family-names: Kong
+  - given-names: Jian
+    family-names: Wang
+  - given-names: Xingyu
+    family-names: Chen
+  - given-names: Zhanhua
+    family-names: Xin
+  - given-names: Chen
+    family-names: Lv
+  - given-names: Dekui
+    family-names: He
+  - given-names: Junzhi
+    family-names: Yu
+license: MIT
+repository-code: "https://github.com/<org>/Bioinspired-Invasive-Fish-Monitoring"
+preferred-citation:
+  type: article
+  title: "Bioinspired molecular–visual monitoring of invasive fishes"
+  authors:
+    - given-names: Lei
+      family-names: Li
+    - given-names: Yanyu
+      family-names: Li
+    - given-names: Lei
+      family-names: Yang
+    - given-names: Junzhi
+      family-names: Yu
+    - given-names: Dekui
+      family-names: He
+    - given-names: Chen
+      family-names: Lv
+  # journal / year / doi to be completed upon publication
+  year: 2026
+  notes: "DOI and full author/venue metadata to be added upon publication."

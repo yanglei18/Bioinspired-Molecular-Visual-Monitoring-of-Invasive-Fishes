@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  smoke:
+    name: Lint & smoke tests (no GPU / torch)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install lightweight dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Torch/torchvision/SAM2/GroundingDINO/TrackEval are intentionally NOT
+          # installed here: this CI only checks syntax, config loading and the
+          # torch-free code paths. Full functional tests require a GPU + torch env.
+          pip install numpy pyyaml opencv-python-headless pillow tqdm pytest ruff
+
+      - name: Byte-compile all sources
+        run: python -m compileall object_centric_extractor open_world_filter
+
+      - name: Lint (non-blocking)
+        run: ruff check object_centric_extractor open_world_filter || true
+
+      - name: Smoke tests
+        run: pytest -q tests/
