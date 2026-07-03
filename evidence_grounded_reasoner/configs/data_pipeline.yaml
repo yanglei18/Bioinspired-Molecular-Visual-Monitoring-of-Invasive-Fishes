@@ -1,0 +1,42 @@
+# FG-VLM Data Pipeline Configuration
+# Copy this file and fill in your own values.
+
+stage1:
+  # API settings (prefer environment variables: FGVLM_API_KEY, FGVLM_ENDPOINT, etc.)
+  api_key: ""
+  endpoint: ""
+  api_version: "2024-03-01-preview"
+  model_name: ""
+
+  # Data paths
+  video_dir: ""           # Directory containing per-species video folders
+  output_dir: "stage1_vqa_results"
+
+  # Species
+  fish_code: ""           # e.g. "crucian_carp"
+  fish_real_name: ""      # e.g. "Crucian carp"
+
+  # Video processing
+  max_frame_limit: 50     # Max frames to sample from each video
+  max_file_size_mb: 500   # Skip videos larger than this
+
+  # Concurrency
+  max_concurrency: 50
+
+stage2:
+  # API settings (inherits from env vars if not set)
+  api_key: ""
+  endpoint: ""
+  api_version: "2024-03-01-preview"
+  model_name: ""
+
+  # Data paths
+  vqa_results_dir: "stage1_vqa_results"  # Stage 1 output directory
+  output_dir: "stage2_cot_results"
+
+  # Species
+  fish_code: ""
+  fish_real_name: ""
+
+  # Concurrency
+  max_concurrency: 50

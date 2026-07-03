@@ -47,6 +47,11 @@ evidence_grounded_reasoner/FishVL-4B-Thinking/
 # Removed from the public release
 CITATION.cff
 
+# Vendored ms-swift framework — use `pip install ms-swift==4.0.2` instead of bundling it
+evidence_grounded_reasoner/scripts/ms-swift/
+# Superseded old code kept only as local dev history (contains an old internal path leak)
+evidence_grounded_reasoner/history/
+
 # Unpublished manuscript drafts — must NOT be committed to a public repository
 manuscripts/
 *.docx

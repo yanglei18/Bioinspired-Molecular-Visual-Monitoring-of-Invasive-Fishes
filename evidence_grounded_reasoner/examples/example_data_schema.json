@@ -1,0 +1,34 @@
+{
+  "sft": [
+    {
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are an expert ichthyologist..."
+        },
+        {
+          "role": "user",
+          "content": "<video>\nDescribe what kind of fish is in this video.\nOptions:\n(A) black carp\n(B) common carp"
+        },
+        {
+          "role": "assistant",
+          "content": "<think>...</think><rethink>...</rethink><answer>(A) black carp</answer>"
+        }
+      ],
+      "videos": ["/path/to/video.mp4"]
+    }
+  ],
+  "rl": [
+    {
+      "messages": [
+        {
+          "role": "user",
+          "content": "<video>\nDescribe what kind of fish is in this video.\nOptions:\n(A) brown trout\n(B) common carp"
+        }
+      ],
+      "videos": ["/path/to/video.mp4"],
+      "solution": ["(A) brown trout"],
+      "reasoning_content": "<think>evidence observations...</think><rethink>evidence-based exclusion...</rethink>"
+    }
+  ]
+}

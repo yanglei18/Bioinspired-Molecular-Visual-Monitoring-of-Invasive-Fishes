@@ -1,0 +1,10 @@
+name: FG-VLM
+channels:
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - cuda-toolkit=12.4
+  - pip:
+      - -r requirements.txt
