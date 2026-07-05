@@ -26,7 +26,7 @@ Each module Tutorial is the authoritative source for that module's commands, con
 | Module | Role |
 |--------|------|
 | [`object_centric_extractor`](object_centric_extractor/README.md) | Object-centric sequence generation: Grounded-SAM2 detection → segmentation → mask tracking → instance crop/video export, plus detection/tracking evaluation. |
-| [`open_world_filter`](open_world_filter/README.md) | Open-world candidate filtering: BYOL-style representation training + reference-set matching to retain in-scope invasive candidates and reject unknowns. |
+| [`open_world_filter`](open_world_filter/README.md) | Open-world candidate filtering: momentum-based dual-branch representation training + reference-set matching to retain in-scope invasive candidates and reject unknowns. |
 | [`evidence_grounded_reasoner`](evidence_grounded_reasoner/README.md) | Evidence-grounded fine-grained confirmation: a reasoning VLM (Qwen3-VL, Think-SFT + GRPO) producing `<think>/<rethink>/<answer>` species decisions. |
 
 ## Repository Structure

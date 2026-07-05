@@ -266,7 +266,7 @@ def create_data_loaders(
 
     if args.use_class_pairs:
         if rank == 0:
-            logger.info("Using class-paired BYOL approach with images from same class...")
+            logger.info("Using class-paired Consistency approach with images from same class...")
         train_dataset, val_dataset = ClassPairFishDataset.get_datasets(
             train_dir=args.train_dir,
             val_dir=args.val_dir,
@@ -275,7 +275,7 @@ def create_data_loaders(
         )
     else:
         if rank == 0:
-            logger.info("Using standard BYOL approach with augmentations...")
+            logger.info("Using standard Consistency approach with augmentations...")
         train_dataset, val_dataset = FishDataset.get_datasets(
             train_dir=args.train_dir,
             val_dir=args.val_dir,
@@ -427,7 +427,7 @@ def main():
         if rank == 0:
             logger.info(f"Starting training for {args.epochs} epochs...")
         
-        save_path = _train_byol(
+        save_path = _train_consistency(
             model=model,
             train_loader=train_loader,
             val_loader=val_loader,
@@ -445,7 +445,7 @@ def main():
             profile_batches=args.profile_batches,
             gradient_clip=args.gradient_clip,
             warmup_epochs=args.warmup_epochs,
-            args=args # Pass args to _train_byol
+            args=args # Pass args to _train_consistency
         )
         
         if rank == 0:
@@ -457,11 +457,11 @@ def main():
     finally:
         cleanup()
 
-def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weight_decay, 
+def _train_consistency(model, train_loader, val_loader, train_sampler, epochs, lr, weight_decay, 
                 save_path, use_class_pairs, device, is_distributed, rank, local_rank, 
                 world_size, profile_batches=0, gradient_clip=1.0, warmup_epochs=5, args=None):
     """
-    Enhanced training function using BYOL with comprehensive multi-GPU support and detailed time tracking
+    Enhanced training function using Consistency with comprehensive multi-GPU support and detailed time tracking
     
     Args:
         model: The model to train
@@ -472,7 +472,7 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
         lr: Base learning rate
         weight_decay: Weight decay for optimizer
         save_path: Path to save model (directory path)
-        use_class_pairs: Whether to use class-paired BYOL
+        use_class_pairs: Whether to use class-paired Consistency
         device: The device to use for training
         is_distributed: Boolean indicating if distributed training is used
         rank: Global rank of the current process
@@ -603,7 +603,7 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
         # Training phase
         model.train()
         total_loss_sum = 0
-        byol_loss_sum = 0
+        consistency_loss_sum = 0
         radius_loss_l2_sum = 0
         center_distance_loss_l2_sum = 0
         batch_count = 0
@@ -616,7 +616,7 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
                 schedule=torch.profiler.schedule(
                     wait=1, warmup=1, active=profile_batches, repeat=1
                 ),
-                on_trace_ready=torch.profiler.tensorboard_trace_handler('./profiler_traces/train_byol'),
+                on_trace_ready=torch.profiler.tensorboard_trace_handler('./profiler_traces/train_consistency'),
                 record_shapes=True,
                 profile_memory=True,
                 with_stack=True
@@ -631,7 +631,7 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
             # Stop profiling after specified batches
             if rank == 0 and prof and batch_idx >= (1 + 1 + profile_batches):
                 prof.stop()
-                logger.info(f"Profiling finished. Trace saved to ./profiler_traces/train_byol")
+                logger.info(f"Profiling finished. Trace saved to ./profiler_traces/train_consistency")
                 prof = None
             
             # Prepare batch data
@@ -650,14 +650,14 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
             
             with torch.amp.autocast('cuda'):
                 if use_class_pairs:
-                    total_loss, byol_loss, radius_loss_l2, center_distance_loss_l2 = model(anchor_images, positive_images, labels)
+                    total_loss, consistency_loss, radius_loss_l2, center_distance_loss_l2 = model(anchor_images, positive_images, labels)
                 else:
-                    total_loss, byol_loss, radius_loss_l2, center_distance_loss_l2 = model(src_images, labels=labels)
+                    total_loss, consistency_loss, radius_loss_l2, center_distance_loss_l2 = model(src_images, labels=labels)
                 
                 # Average loss if using DataParallel (not DDP)
                 if not is_distributed and isinstance(model, nn.DataParallel):
                     total_loss = total_loss.mean()
-                    byol_loss = byol_loss.mean()
+                    consistency_loss = consistency_loss.mean()
                     radius_loss_l2 = radius_loss_l2.mean()
                     center_distance_loss_l2 = center_distance_loss_l2.mean()
 
@@ -681,12 +681,12 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
 
             # Track all losses
             total_loss_val = total_loss.item()
-            byol_loss_val = byol_loss.item()
+            consistency_loss_val = consistency_loss.item()
             radius_loss_l2_val = radius_loss_l2.item()
             center_distance_loss_l2_val = center_distance_loss_l2.item()
             
             total_loss_sum += total_loss_val
-            byol_loss_sum += byol_loss_val
+            consistency_loss_sum += consistency_loss_val
             radius_loss_l2_sum += radius_loss_l2_val
             center_distance_loss_l2_sum += center_distance_loss_l2_val
             batch_count += 1
@@ -719,7 +719,7 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
                     logger.info(f"Epoch {step_info['epoch_progress']} | "
                                f"Step {step_info['step_progress']} | "
                                f"Total Loss: {total_loss_val:.4f} | "
-                               f"BYOL Loss: {byol_loss_val:.4f} | "
+                               f"Consistency Loss: {consistency_loss_val:.4f} | "
                                f"Radius L2: {radius_loss_l2_val:.4f} | "
                                f"Center L2: {center_distance_loss_l2_val:.4f} | "
                                f"LR: {current_lr:.2e}")
@@ -736,7 +736,7 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
                     remaining_total_time = TimeTracker.format_time(step_info['remaining_time_total'])
                     logger.info(f"E{epoch+1}/{epochs} B{batch_idx+1}/{len(train_loader)} | "
                                f"Total: {total_loss_val:.4f} | "
-                               f"BYOL: {byol_loss_val:.4f} | "
+                               f"Consistency: {consistency_loss_val:.4f} | "
                                f"Radius L2: {radius_loss_l2_val:.4f} | "
                                f"Center L2: {center_distance_loss_l2_val:.4f} | "
                                f"ETA: {remaining_total_time} | "
@@ -752,29 +752,29 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
         # Cleanup profiler
         if rank == 0 and prof:
             prof.stop()
-            logger.info(f"Profiling finished at end of epoch. Trace saved to ./profiler_traces/train_byol")
+            logger.info(f"Profiling finished at end of epoch. Trace saved to ./profiler_traces/train_consistency")
             prof = None
 
         # Calculate average training losses
         avg_total_loss = total_loss_sum / batch_count
-        avg_byol_loss = byol_loss_sum / batch_count
+        avg_consistency_loss = consistency_loss_sum / batch_count
         avg_radius_loss_l2 = radius_loss_l2_sum / batch_count
         avg_center_distance_loss_l2 = center_distance_loss_l2_sum / batch_count
         
         # Synchronize training losses across all processes
         if is_distributed:
             avg_total_loss_tensor = torch.tensor(avg_total_loss, device=device)
-            avg_byol_loss_tensor = torch.tensor(avg_byol_loss, device=device)
+            avg_consistency_loss_tensor = torch.tensor(avg_consistency_loss, device=device)
             avg_radius_loss_l2_tensor = torch.tensor(avg_radius_loss_l2, device=device)
             avg_center_distance_loss_l2_tensor = torch.tensor(avg_center_distance_loss_l2, device=device)
             
             dist.all_reduce(avg_total_loss_tensor, op=dist.ReduceOp.AVG)
-            dist.all_reduce(avg_byol_loss_tensor, op=dist.ReduceOp.AVG)
+            dist.all_reduce(avg_consistency_loss_tensor, op=dist.ReduceOp.AVG)
             dist.all_reduce(avg_radius_loss_l2_tensor, op=dist.ReduceOp.AVG)
             dist.all_reduce(avg_center_distance_loss_l2_tensor, op=dist.ReduceOp.AVG)
             
             avg_total_loss = avg_total_loss_tensor.item()
-            avg_byol_loss = avg_byol_loss_tensor.item()
+            avg_consistency_loss = avg_consistency_loss_tensor.item()
             avg_radius_loss_l2 = avg_radius_loss_l2_tensor.item()
             avg_center_distance_loss_l2 = avg_center_distance_loss_l2_tensor.item()
 
@@ -796,7 +796,7 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
                 logger.info("="*80)
                 logger.info(f"EPOCH {epoch+1}/{epochs} COMPLETED")
                 logger.info(f"📈 Total Loss: {avg_total_loss:.4f} | "
-                           f"BYOL Loss: {avg_byol_loss:.4f} | "
+                           f"Consistency Loss: {avg_consistency_loss:.4f} | "
                            f"Radius L2: {avg_radius_loss_l2:.4f} | "
                            f"Center L2: {avg_center_distance_loss_l2:.4f} | "
                            f"LR: {current_lr:.2e}")
@@ -815,7 +815,7 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
                 
                 model.eval()
                 val_total_loss = 0
-                val_byol_loss = 0
+                val_consistency_loss = 0
                 val_radius_loss_l2 = 0
                 val_center_distance_loss_l2 = 0
                 val_batch_count = 0
@@ -828,7 +828,7 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
                     for chunk_start in range(0, len(val_loader), chunk_size):
                         chunk_end = min(chunk_start + chunk_size, len(val_loader))
                         chunk_total_loss = 0
-                        chunk_byol_loss = 0
+                        chunk_consistency_loss = 0
                         chunk_radius_loss_l2 = 0
                         chunk_center_distance_loss_l2 = 0
                         chunk_count = 0
@@ -844,31 +844,31 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
                                 labels = labels.to(device, non_blocking=True)
                                 
                                 with torch.amp.autocast('cuda'):
-                                    total_loss, byol_loss, radius_loss_l2, center_distance_loss_l2 = model(anchor_images, positive_images, labels)
+                                    total_loss, consistency_loss, radius_loss_l2, center_distance_loss_l2 = model(anchor_images, positive_images, labels)
                             else:
                                 src_images, labels = batch_data
                                 src_images = src_images.to(device, non_blocking=True)
                                 labels = labels.to(device, non_blocking=True)
                                 
                                 with torch.amp.autocast('cuda'):
-                                    total_loss, byol_loss, radius_loss_l2, center_distance_loss_l2 = model(src_images, labels=labels)
+                                    total_loss, consistency_loss, radius_loss_l2, center_distance_loss_l2 = model(src_images, labels=labels)
                             
                             # Average loss if using DataParallel
                             if not is_distributed and isinstance(model, nn.DataParallel):
                                 total_loss = total_loss.mean()
-                                byol_loss = byol_loss.mean()
+                                consistency_loss = consistency_loss.mean()
                                 radius_loss_l2 = radius_loss_l2.mean()
                                 center_distance_loss_l2 = center_distance_loss_l2.mean()
 
                             chunk_total_loss += total_loss.item()
-                            chunk_byol_loss += byol_loss.item()
+                            chunk_consistency_loss += consistency_loss.item()
                             chunk_radius_loss_l2 += radius_loss_l2.item()
                             chunk_center_distance_loss_l2 += center_distance_loss_l2.item()
                             chunk_count += 1
                         
                         # Update overall validation metrics
                         val_total_loss += chunk_total_loss
-                        val_byol_loss += chunk_byol_loss
+                        val_consistency_loss += chunk_consistency_loss
                         val_radius_loss_l2 += chunk_radius_loss_l2
                         val_center_distance_loss_l2 += chunk_center_distance_loss_l2
                         val_batch_count += chunk_count
@@ -877,7 +877,7 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
                         if rank == 0:
                             progress = (chunk_end) / len(val_loader) * 100
                             avg_chunk_total = chunk_total_loss / chunk_count
-                            avg_chunk_byol = chunk_byol_loss / chunk_count
+                            avg_chunk_consistency = chunk_consistency_loss / chunk_count
                             avg_chunk_radius_l2 = chunk_radius_loss_l2 / chunk_count
                             avg_chunk_center_distance_l2 = chunk_center_distance_loss_l2 / chunk_count
                             
@@ -888,7 +888,7 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
                                 f"Validation progress: {chunk_end}/{len(val_loader)} "
                                 f"({progress:.1f}%) | "
                                 f"Chunk Loss: {avg_chunk_total:.4f} | "
-                                f"BYOL: {avg_chunk_byol:.4f} | "
+                                f"Consistency: {avg_chunk_consistency:.4f} | "
                                 f"Radius L2: {avg_chunk_radius_l2:.4f} | "
                                 f"Center L2: {avg_chunk_center_distance_l2:.4f} | "
                                 f"ETA: {TimeTracker.format_time(val_eta)}"
@@ -899,24 +899,24 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
                 
                 # Calculate average validation losses
                 avg_val_total_loss = val_total_loss / val_batch_count
-                avg_val_byol_loss = val_byol_loss / val_batch_count
+                avg_val_consistency_loss = val_consistency_loss / val_batch_count
                 avg_val_radius_loss_l2 = val_radius_loss_l2 / val_batch_count
                 avg_val_center_distance_loss_l2 = val_center_distance_loss_l2 / val_batch_count
                 
                 # Synchronize validation losses across all processes
                 if is_distributed:
                     avg_val_total_loss_tensor = torch.tensor(avg_val_total_loss, device=device)
-                    avg_val_byol_loss_tensor = torch.tensor(avg_val_byol_loss, device=device)
+                    avg_val_consistency_loss_tensor = torch.tensor(avg_val_consistency_loss, device=device)
                     avg_val_radius_loss_l2_tensor = torch.tensor(avg_val_radius_loss_l2, device=device)
                     avg_val_center_distance_loss_l2_tensor = torch.tensor(avg_val_center_distance_loss_l2, device=device)
                     
                     dist.all_reduce(avg_val_total_loss_tensor, op=dist.ReduceOp.AVG)
-                    dist.all_reduce(avg_val_byol_loss_tensor, op=dist.ReduceOp.AVG)
+                    dist.all_reduce(avg_val_consistency_loss_tensor, op=dist.ReduceOp.AVG)
                     dist.all_reduce(avg_val_radius_loss_l2_tensor, op=dist.ReduceOp.AVG)
                     dist.all_reduce(avg_val_center_distance_loss_l2_tensor, op=dist.ReduceOp.AVG)
                     
                     avg_val_total_loss = avg_val_total_loss_tensor.item()
-                    avg_val_byol_loss = avg_val_byol_loss_tensor.item()
+                    avg_val_consistency_loss = avg_val_consistency_loss_tensor.item()
                     avg_val_radius_loss_l2 = avg_val_radius_loss_l2_tensor.item()
                     avg_val_center_distance_loss_l2 = avg_val_center_distance_loss_l2_tensor.item()
 
@@ -926,7 +926,7 @@ def _train_byol(model, train_loader, val_loader, train_sampler, epochs, lr, weig
                 if rank == 0:
                     logger.info(f"✅ Validation completed in {TimeTracker.format_time(val_duration)}")
                     logger.info(f"Validation Total Loss: {avg_val_total_loss:.4f} | "
-                               f"BYOL Loss: {avg_val_byol_loss:.4f} | "
+                               f"Consistency Loss: {avg_val_consistency_loss:.4f} | "
                                f"Radius L2: {avg_val_radius_loss_l2:.4f} | "
                                f"Center L2: {avg_val_center_distance_loss_l2:.4f}")
                     

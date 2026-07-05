@@ -46,7 +46,7 @@ class ProjectionHead(nn.Module):
         return self.net(x)
 
 class PredictionHead(nn.Module):
-    """Prediction head for BYOL"""
+    """Prediction head for Consistency"""
     def __init__(self, input_dim=512, hidden_dim=1024, output_dim=512):
         super().__init__()
         self.net = nn.Sequential(
@@ -151,7 +151,7 @@ class OpenWorldEncoder(nn.Module):
     
     def _compute_loss(self, online, target, normalize=True):
         """
-        Classic BYOL loss function - mean squared error between normalized vectors
+        Classic Consistency loss function - mean squared error between normalized vectors
         
         Args:
             online: Online network predictions
@@ -162,7 +162,7 @@ class OpenWorldEncoder(nn.Module):
             online = F.normalize(online, dim=1, p=2)
             target = F.normalize(target, dim=1, p=2)
         
-        # Compute MSE loss between normalized vectors (classic BYOL loss)
+        # Compute MSE loss between normalized vectors (classic Consistency loss)
         loss = 2 - 2 * (online * target).sum(dim=1)
         
         return loss.mean()
@@ -286,23 +286,23 @@ class OpenWorldEncoder(nn.Module):
 
     def forward(self, x1, x2=None, labels=None):
         """
-        Forward pass for training using the BYOL-style approach with class-paired images,
+        Forward pass for training using the Consistency-style approach with class-paired images,
         plus L2 radius regularization (class compactness) and L2 center-distance
         regularization (class separation).
 
         Args:
             x1: First batch of images (shape [B, C, H, W])
             x2: Second batch of images from same class (shape [B, C, H, W]),
-                if None, uses standard BYOL with augmentations of x1
+                if None, uses standard Consistency with augmentations of x1
             labels: Class labels for the batch [B]
 
         Returns:
-            tuple: (total_loss, byol_loss, radius_loss_l2, center_distance_loss_l2)
+            tuple: (total_loss, consistency_loss, radius_loss_l2, center_distance_loss_l2)
         """
         batch_size = x1.shape[0]
         
         if x2 is None:
-            # Fallback to standard BYOL with two augmentations of the same image
+            # Fallback to standard Consistency with two augmentations of the same image
             x1_aug = torch.stack([self.tensor_augmentation1(img) for img in x1])
             x2_aug = torch.stack([self.tensor_augmentation2(img) for img in x1])
         else:
@@ -327,10 +327,10 @@ class OpenWorldEncoder(nn.Module):
             target_feat2 = self.target_backbone(x2_aug)
             target_proj2 = self.target_projector(target_feat2)
         
-        # BYOL loss (symmetric)
+        # Consistency loss (symmetric)
         loss1 = self._compute_loss(online_pred1, target_proj2.detach(), normalize=True)
         loss2 = self._compute_loss(online_pred2, target_proj1.detach(), normalize=True)
-        byol_loss = (loss1 + loss2) / 2
+        consistency_loss = (loss1 + loss2) / 2
         
         # Initialize additional losses
         radius_loss_l2 = torch.tensor(0.0, device=self.device)
@@ -347,11 +347,11 @@ class OpenWorldEncoder(nn.Module):
             center_distance_loss_l2 = self._compute_center_distance_loss_l2(combined_features, combined_labels)
         
         # Combine all losses
-        total_loss = (byol_loss + 
+        total_loss = (consistency_loss + 
                      self.radius_weight_l2 * radius_loss_l2 + 
                      self.center_distance_weight_l2 * center_distance_loss_l2)
 
-        return total_loss, byol_loss, radius_loss_l2, center_distance_loss_l2
+        return total_loss, consistency_loss, radius_loss_l2, center_distance_loss_l2
     
 
     

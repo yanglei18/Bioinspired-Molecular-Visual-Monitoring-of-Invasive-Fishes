@@ -1,9 +1,9 @@
 # open_world_filter
 
-Open-world candidate filtering: this module learns a BYOL-style discriminative representation and uses
-reference-set matching to retain in-scope invasive-fish candidates and reject unknown / non-target
-observations. It covers representation training, multi-GPU inference, dataset building, and
-threshold optimization.
+Open-world candidate filtering: this module learns a discriminative representation with a
+momentum-based, dual-branch (self-distillation) objective and uses reference-set matching to retain
+in-scope invasive-fish candidates and reject unknown / non-target observations. It covers
+representation training, multi-GPU inference, dataset building, and threshold optimization.
 
 ## Core Entry Points
 
