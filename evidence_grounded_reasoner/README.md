@@ -65,38 +65,37 @@ pip install "ms-swift==4.0.2"
 
 ### Download the Base Model
 
+Download the base VLM to train FG-VLM on the **nine invasive species** from scratch:
+
 ```bash
 huggingface-cli download Qwen/Qwen3-VL-4B-Instruct \
   --local-dir ./checkpoints/Qwen3-VL-4B-Instruct
 ```
+
+> **Note.** The released `FG-VLM-4B-Thinking` checkpoint is a **Yanghu-pond (10-species)** model used
+> to score `object_centric_extractor` outputs in the repository's end-to-end loop (see the root
+> README) — a different species domain from the nine-invasive-species model trained here. Do not use
+> it for the invasive-species benchmark below.
 
 ### Prepare Training Data
 
 Either download the pre-processed SFT/RL data, or build it yourself from videos with the two-stage
 CoT pipeline.
 
-- **Option A — download pre-processed data:**
+- **Option A — download pre-processed data** from the Hugging Face dataset:
 
   ```bash
-  # TODO: upload data and update the link below
-  wget https://xxxx/FG-VLM-training-data.tar.gz
-  tar -xzf FG-VLM-training-data.tar.gz -C ./data/
+  huggingface-cli download yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes \
+    object-centric-sequence-data/invasive-fishes-sequence-data.zip --repo-type dataset --local-dir ./data
+  unzip data/object-centric-sequence-data/invasive-fishes-sequence-data.zip -d data/
   ```
 
-  This provides `data/sft_train.json` and `data/rl_train.json` directly.
+  This yields `data/invasive-fishes-sequence-data/` containing `sft_train.json`, `rl_train.json`,
+  `val.json`, and `videos/train/`, `videos/val/`.
 
 - **Option B — build it yourself:** run the VQA → validate → CoT → convert pipeline and the expert
   knowledge base described in [`data_pipeline/README.md`](data_pipeline/README.md). The expected
   SFT / RL JSON schema is documented there as well.
-
-Optionally create a small RL smoke-test dataset for a quick training run:
-
-```bash
-python scripts/prepare_smoke_data.py \
-  --source /path/to/rl_train.json \
-  --output ./data/rl_smoke.json \
-  --num-samples 8
-```
 
 ## Training
 
@@ -136,11 +135,10 @@ Evaluate a trained checkpoint on a fish identification benchmark.
 
 You can either download the pre-built benchmark or generate it from your own video directory.
 
-- **Option A — download the pre-built benchmark:**
+- **Option A — use the released benchmark** (`val.json`, downloaded with the training data above):
 
-  ```bash
-  # TODO: upload benchmark and update the link below
-  wget https://xxxx/FG-VLM-benchmark.json
+  ```text
+  data/object-centric-sequence-data/invasive-fishes-sequence-data/val.json
   ```
 
 - **Option B — generate from your own videos:**

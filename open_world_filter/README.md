@@ -135,7 +135,17 @@ Edit `outputs.evaluation_dir` in the YAML config to change the evaluation output
 
 ## Dataset Building
 
-Build all predefined open-world splits under `SuppExps/`:
+First download the fish-recognition dataset from the
+[Hugging Face dataset](https://huggingface.co/datasets/yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes):
+
+```bash
+huggingface-cli download yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes \
+  fish-recognition-dataset/invasive-dataset.tar.gz --repo-type dataset --local-dir ./data
+tar -xzf data/fish-recognition-dataset/invasive-dataset.tar.gz -C data/fish-recognition-dataset/
+```
+
+This yields `data/fish-recognition-dataset/invasive-dataset/` (raw species-labeled crops). Then build
+all predefined open-world splits under `SuppExps/`:
 
 ```bash
 python3 open_world_filter/tools/build_dataset_suppExps.py \

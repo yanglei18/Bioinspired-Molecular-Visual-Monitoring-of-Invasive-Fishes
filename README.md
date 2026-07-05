@@ -35,15 +35,55 @@ Each module Tutorial is the authoritative source for that module's commands, con
 Bioinspired-Invasive-Fish-Monitoring/
 ├── object_centric_extractor/     # module 1 — detection / tracking / export / eval
 ├── open_world_filter/            # module 2 — open-world candidate filtering
-├── evidence_grounded_reasoner/   # module 3 — reasoning VLM (Think-SFT + GRPO)
-├── checkpoints/                  # local: SAM2 / GroundingDINO weights (not tracked)
-├── data/                         # local: datasets (not tracked)
-├── work_dirs/                    # local: run outputs (not tracked)
+├── evidence_grounded_reasoner/   # module 3 — reasoning VLM (SFT + GRPO)
+├── checkpoints/                  # local, not tracked — weights (SAM2, GroundingDINO, Qwen3-VL, FG-VLM)
+├── data/                         # local, not tracked — datasets (download from Hugging Face)
+│   ├── robotfish-data/               # object_centric_extractor: raw videos + ground truth
+│   │   ├── video/
+│   │   └── label_rectified.json
+│   ├── object-centric-sequence-data/ # extracted object-centric sequences + prediction JSON
+│   │   └── invasive-fishes-sequence-data/   # → evidence_grounded_reasoner (train / eval)
+│   │       ├── videos/               #   train/ and val/
+│   │       ├── sft_train.json
+│   │       ├── rl_train.json
+│   │       └── val.json
+│   └── fish-recognition-dataset/     # open_world_filter
+│       ├── invasive-dataset/
+│       └── SuppExps/                 # generated open-world splits (Invasive-S2/S3/S4-*)
+├── work_dirs/                    # local, not tracked — run outputs
 ├── requirements.txt              # shared Python deps for the two vision modules
 └── LICENSE                       # MIT
 ```
 
 `checkpoints/`, `data/`, and `work_dirs/` are local runtime directories and are not tracked in git.
+
+## Data
+
+Datasets and released model weights are hosted on Hugging Face (not included in this repository):
+**[yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes](https://huggingface.co/datasets/yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes)**.
+
+| Hosted item | Module | Purpose |
+|---|---|---|
+| `robotfish-data.zip` | `object_centric_extractor` | raw robot-fish videos + ground truth — unzip to `data/robotfish-data/` (`video/` + `label_rectified.json`) |
+| `object-centric-sequence-data/` | `object_centric_extractor` | object-centric sequences and prediction JSON extracted from `robotfish-data`, scored with `evaluate_pipeline.py` |
+| `object-centric-sequence-data/invasive-fishes-sequence-data/` | `evidence_grounded_reasoner` | reasoner training/eval data: object-centric videos + `sft_train.json` / `rl_train.json` / `val.json` |
+| `fish-recognition-dataset/` | `open_world_filter` | `data/fish-recognition-dataset/` (then build the SuppExps splits) |
+| `checkpoints/` | closed loop (Quick Start) | released **FG-VLM-4B-Thinking** — a Yanghu-pond (10-species) model that classifies `object_centric_extractor` clips for species-level evaluation |
+
+The released **FG-VLM-4B-Thinking** checkpoint (a Yanghu-pond, 10-species model) drives the end-to-end
+loop in [Quick Start](#quick-start-end-to-end); download it with:
+
+```bash
+huggingface-cli download yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes \
+  checkpoints/FG-VLM-4B-Thinking.zip --repo-type dataset --local-dir ./
+unzip checkpoints/FG-VLM-4B-Thinking.zip -d checkpoints/   # -> checkpoints/FG-VLM-4B-Thinking/
+```
+
+**Data flow.** `robotfish-data` (Yanghu, 10 species) → `object_centric_extractor` extracts
+object-centric sequences + prediction JSON (scored by `evaluate_pipeline.py`); the released
+`FG-VLM-4B-Thinking` then classifies each clip and its answers are fed back for species-level
+evaluation. Separately, `object-centric-sequence-data` (9 invasive species) is used to train and
+evaluate a from-scratch FG-VLM in `evidence_grounded_reasoner`. See each module's Tutorial for details.
 
 ## Installation
 
@@ -73,22 +113,44 @@ Run all commands from the repository root so config-relative paths resolve corre
 ## Quick Start (end-to-end)
 
 ```bash
-# 1) Extract object-centric sequences (detection + tracking + instance export)
+# 1) Extract object-centric sequences from raw robot-fish videos
 python3 object_centric_extractor/run_extract_object_sequences.py
+#    -> work_dirs/extraction_output/instance_video/<video>_<instance>.mp4  (object-centric clips)
+#    -> work_dirs/extraction_output/annotation_det/prediction.json         (coarse "fish" predictions)
 
-# 2) Detection / tracking evaluation
+# 2) Coarse detection / tracking evaluation
 python3 object_centric_extractor/evaluate_pipeline.py
 
-# 3) Train and evaluate the open-world filter
+# 3) Open-world filtering — retain in-scope invasive candidates, reject unknowns
 bash open_world_filter/scripts/train_script.sh     open_world_filter/configs/invasive-s4-a.yaml 1
 bash open_world_filter/scripts/inference_script.sh open_world_filter/configs/invasive-s4-a.yaml 1
 
-# 4) Fine-grained species confirmation with the reasoning VLM
-#    (see evidence_grounded_reasoner/README.md — training, eval, and weights)
+# 4) Fine-grained species confirmation with the released FG-VLM-4B-Thinking checkpoint.
+#    Use the 10 Yanghu-pond species (they match the extractor's evaluation classes, so the
+#    answers can be fed back in step 5).
+python3 evidence_grounded_reasoner/eval/generate_benchmark.py \
+  --video-dir work_dirs/extraction_output/instance_video --output benchmark.json \
+  --options "black carp" "chinese labeo" "chinese sucker" "redeye barbel" "serrated barb" \
+            "common carp" "chinese paddlefish" "mud carp" "schizothorax fish" "wuchang bream"
+bash evidence_grounded_reasoner/eval/run_eval_pipeline.sh checkpoints/FG-VLM-4B-Thinking \
+  --benchmark-file benchmark.json --run-dir ./eval_output
+#    -> eval_output/res.json   (per-clip answers: <answer>(X) species ...</answer>)
+
+# 5) Feed the VLM predictions back for fine-grained (species-level) detection evaluation
+python3 object_centric_extractor/evaluate_pipeline.py --inference_json eval_output/res.json
 ```
 
-Full options, data preparation, configuration, and output layouts for each step are documented in
-the corresponding module Tutorial linked in the [Modules](#modules) table above.
+**Closed loop (Yanghu-pond evaluation).** Steps 1–2 and 4–5 form an automatic loop on the
+robot-fish-collected Yanghu data: the extractor exports object-centric clips named
+`<video>_<instance>.mp4`; the released **FG-VLM-4B-Thinking** classifies each clip into a `(A)…(J)`
+species answer; and `evaluate_pipeline.py --inference_json` maps those answers back onto the detections
+(by instance id, through the shared 10-species vocabulary) and runs species-level evaluation — no
+manual conversion needed.
+
+**Separate workflows.** Training FG-VLM from scratch on the **nine invasive species**
+(`object-centric-sequence-data`) and scoring it on its own benchmark (`compute_accuracy.py`), and the
+`open_world_filter` screening benchmark (step 3), are independent per-module workflows on their own
+data — they are not part of the Yanghu feedback loop above. See each module's Tutorial for details.
 
 ## License
 

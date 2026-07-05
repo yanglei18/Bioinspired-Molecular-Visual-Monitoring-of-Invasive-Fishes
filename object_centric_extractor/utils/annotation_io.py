@@ -11,7 +11,7 @@ AGGREGATED_ANNOTATION_FILENAME = "prediction.json"
 LEGACY_AGGREGATED_ANNOTATION_FILENAMES = (
     "annotations.json",
     # Compatibility with historical outputs that misspelled prediction.json.
-    "perdiction.json",
+    "prediction.json",
 )
 DATASET_SEQUENCE_KEY = "videos"
 

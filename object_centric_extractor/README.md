@@ -62,6 +62,21 @@ pip install git+https://github.com/IDEA-Research/Grounded-SAM-2.git
 pip install git+https://github.com/IDEA-Research/GroundingDINO.git
 ```
 
+## Data
+
+Download the raw robot-fish videos and ground-truth labels from the
+[Hugging Face dataset](https://huggingface.co/datasets/yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes):
+
+```bash
+huggingface-cli download yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes \
+  robotfish-data.zip --repo-type dataset --local-dir ./data
+unzip data/robotfish-data.zip -d data/
+```
+
+This yields `data/robotfish-data/video/` (input videos/frames) and
+`data/robotfish-data/label_rectified.json` (evaluation ground truth) — matching the default paths in
+`configs/default.yaml`.
+
 ## Inference
 
 Default paths, checkpoints, thresholds, crop settings, and evaluation options are defined in:

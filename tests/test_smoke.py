@@ -86,7 +86,7 @@ def test_input_discovery_video_detection(tmp_path=None):
             shutil.rmtree(base, ignore_errors=True)
 
 
-def test_legacy_perdiction_filename_loads(tmp_path=None):
+def test_legacy_prediction_filename_loads(tmp_path=None):
     import json
     import tempfile
     from object_centric_extractor.utils.annotation_io import load_prediction_sequences
@@ -112,7 +112,7 @@ def test_legacy_perdiction_filename_loads(tmp_path=None):
         },
         "sequence_count": 1,
     }
-    (base / "perdiction.json").write_text(json.dumps(payload), encoding="utf-8")
+    (base / "prediction.json").write_text(json.dumps(payload), encoding="utf-8")
     try:
         sequences = load_prediction_sequences(base)
         assert list(sequences) == ["demo_sequence"]
@@ -130,7 +130,7 @@ if __name__ == "__main__":
         test_classifier_configs_load,
         test_fish_label_map,
         test_input_discovery_video_detection,
-        test_legacy_perdiction_filename_loads,
+        test_legacy_prediction_filename_loads,
     ]
     failed = 0
     for fn in tests:
