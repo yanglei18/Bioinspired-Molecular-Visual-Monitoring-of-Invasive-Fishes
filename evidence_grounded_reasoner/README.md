@@ -1,7 +1,7 @@
 # Evidence-Grounded Fine-Grained Confirmation
 
 This module (`evidence_grounded_reasoner/`) implements the **evidence-grounded fine-grained
-confirmation** stage of the paper *"Bioinspired molecular–visual monitoring of invasive fishes"* — an
+confirmation** stage of the paper *"Bioinspired molecular–visual surveillance of invasive fishes"* — an
 evidence-grounded vision–language reasoning model that confirms fish species from a short video,
 producing an explicit `<think>` / `<rethink>` / `<answer>` reasoning trace. *(Referred to in code and
 scripts by the short handle **FG-VLM**.)*
@@ -85,7 +85,7 @@ CoT pipeline.
 - **Option A — download pre-processed data** from the Hugging Face dataset:
 
   ```bash
-  huggingface-cli download yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes \
+  huggingface-cli download yanglei18/Bioinspired-Molecular-Visual-Surveillance-of-Invasive-Fishes \
     object-centric-sequence-data/invasive-fishes-sequence-data.zip --repo-type dataset --local-dir ./data
   unzip data/object-centric-sequence-data/invasive-fishes-sequence-data.zip -d data/
   ```
@@ -152,8 +152,10 @@ You can either download the pre-built benchmark or generate it from your own vid
               "Mozambique tilapia" "Rainbow trout" "Brown trout"
   ```
 
-  Each benchmark entry has `video_path` and `question` fields. Add `--answer "species name"` to
-  include a `ground_truth` field for accuracy scoring.
+  Here `--options` lists the **nine invasive species** (this module's domain). Each benchmark entry
+  has `video_path` and `question` fields; add `--answer "species name"` to include a `ground_truth`
+  field for accuracy scoring. (The `--species-set yanghu` preset is only for the object_centric_extractor
+  closed loop in the root README, not for this invasive-species benchmark.)
 
 ### Step 2: Run inference
 

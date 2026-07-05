@@ -9,6 +9,17 @@ import json
 import os
 
 
+# Predefined species sets. `yanghu` are the 10 Yanghu-pond species used by the
+# object_centric_extractor closed loop (they match its evaluation classes). Other
+# experiments (e.g. the nine invasive species) pass their own list via --options.
+SPECIES_SETS = {
+    "yanghu": [
+        "black carp", "chinese labeo", "chinese sucker", "redeye barbel", "serrated barb",
+        "common carp", "chinese paddlefish", "mud carp", "schizothorax fish", "wuchang bream",
+    ],
+}
+
+
 def build_question_prompt(options: list[str]) -> str:
     lines = ['<video>', 'Describe what kind of fish is in this video.', 'Options:']
     for i, opt in enumerate(options):
@@ -21,13 +32,24 @@ def main():
     parser = argparse.ArgumentParser(description='Generate benchmark JSON from video directory')
     parser.add_argument('--video-dir', required=True, help='Directory containing .mp4 video files')
     parser.add_argument('--output', required=True, help='Output benchmark JSON path')
-    parser.add_argument('--options', nargs='+', required=True,
-                        help='Candidate species names (e.g., "Common carp" "Crucian carp")')
+    parser.add_argument('--options', nargs='+', default=None,
+                        help='Candidate species names (e.g., "Common carp" "Crucian carp"). '
+                             'Provide this or --species-set.')
+    parser.add_argument('--species-set', choices=sorted(SPECIES_SETS), default=None,
+                        help='Use a predefined species set instead of --options '
+                             '(e.g. "yanghu" = the 10 Yanghu-pond species).')
     parser.add_argument('--answer', default='',
                         help='If set, add a ground_truth answer field with this value to all entries')
     args = parser.parse_args()
 
-    question_prompt = build_question_prompt(args.options)
+    if args.species_set:
+        options = SPECIES_SETS[args.species_set]
+    elif args.options:
+        options = args.options
+    else:
+        parser.error('provide either --options or --species-set')
+
+    question_prompt = build_question_prompt(options)
     video_files = sorted(glob.glob(os.path.join(args.video_dir, '*.mp4')))
     if not video_files:
         print(f'No .mp4 files found in {args.video_dir}')

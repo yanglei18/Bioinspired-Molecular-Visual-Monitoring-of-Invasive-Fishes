@@ -136,10 +136,10 @@ Edit `outputs.evaluation_dir` in the YAML config to change the evaluation output
 ## Dataset Building
 
 First download the fish-recognition dataset from the
-[Hugging Face dataset](https://huggingface.co/datasets/yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes):
+[Hugging Face dataset](https://huggingface.co/datasets/yanglei18/Bioinspired-Molecular-Visual-Surveillance-of-Invasive-Fishes):
 
 ```bash
-huggingface-cli download yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes \
+huggingface-cli download yanglei18/Bioinspired-Molecular-Visual-Surveillance-of-Invasive-Fishes \
   fish-recognition-dataset/invasive-dataset.tar.gz --repo-type dataset --local-dir ./data
 tar -xzf data/fish-recognition-dataset/invasive-dataset.tar.gz -C data/fish-recognition-dataset/
 ```

@@ -65,10 +65,10 @@ pip install git+https://github.com/IDEA-Research/GroundingDINO.git
 ## Data
 
 Download the raw robot-fish videos and ground-truth labels from the
-[Hugging Face dataset](https://huggingface.co/datasets/yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes):
+[Hugging Face dataset](https://huggingface.co/datasets/yanglei18/Bioinspired-Molecular-Visual-Surveillance-of-Invasive-Fishes):
 
 ```bash
-huggingface-cli download yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes \
+huggingface-cli download yanglei18/Bioinspired-Molecular-Visual-Surveillance-of-Invasive-Fishes \
   robotfish-data.zip --repo-type dataset --local-dir ./data
 unzip data/robotfish-data.zip -d data/
 ```

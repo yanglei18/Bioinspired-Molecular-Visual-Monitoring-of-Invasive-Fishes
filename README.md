@@ -1,10 +1,14 @@
-# Bioinspired molecular–visual monitoring of invasive fishes — Visual Perception Pipeline
+# Bioinspired molecular–visual surveillance of invasive fishes — Visual Perception Pipeline
 
 ![Paper: under review](https://img.shields.io/badge/Paper-under%20review-b31b1b.svg)
+[![HuggingFace Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Data%20%26%20Weights-HuggingFace-yellow)](https://huggingface.co/datasets/yanglei18/Bioinspired-Molecular-Visual-Surveillance-of-Invasive-Fishes)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 
-**Paper:** *Bioinspired molecular–visual monitoring of invasive fishes* — Lei Li<sup>†</sup>,
-Yanyu Li<sup>†</sup>, Lei Yang<sup>†</sup>, *et al.*, Chen Lv<sup>\*</sup>, Dekui He<sup>\*</sup>,
-Junzhi Yu<sup>\*</sup> (under review).
+**Paper:** *Bioinspired molecular–visual surveillance of invasive fishes* (under review)
+
+**Authors:** Lei Li<sup>†</sup>, Yanyu Li<sup>†</sup>, Lei Yang<sup>†</sup>, Wenzhuo Gao, Boyang Qin,
+Kai Wu, Shengzhi Wang, Bo Wang, Yiyuan Zhang, Liuyong Ding, Jianshuo Qian, Shihan Kong, Jian Wang,
+Xingyu Chen, Zhanhua Xin, Chen Lv<sup>\*</sup>, Dekui He<sup>\*</sup>, Junzhi Yu<sup>\*</sup>
 
 <sup>†</sup> Equal contribution (co-first authors). &nbsp; <sup>\*</sup> Co-corresponding authors.
 
@@ -32,7 +36,7 @@ Each module Tutorial is the authoritative source for that module's commands, con
 ## Repository Structure
 
 ```text
-Bioinspired-Invasive-Fish-Monitoring/
+Bioinspired-Molecular-Visual-Surveillance-of-Invasive-Fishes/
 ├── object_centric_extractor/     # module 1 — detection / tracking / export / eval
 ├── open_world_filter/            # module 2 — open-world candidate filtering
 ├── evidence_grounded_reasoner/   # module 3 — reasoning VLM (SFT + GRPO)
@@ -60,7 +64,7 @@ Bioinspired-Invasive-Fish-Monitoring/
 ## Data
 
 Datasets and released model weights are hosted on Hugging Face (not included in this repository):
-**[yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes](https://huggingface.co/datasets/yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes)**.
+**[yanglei18/Bioinspired-Molecular-Visual-Surveillance-of-Invasive-Fishes](https://huggingface.co/datasets/yanglei18/Bioinspired-Molecular-Visual-Surveillance-of-Invasive-Fishes)**.
 
 | Hosted item | Module | Purpose |
 |---|---|---|
@@ -74,7 +78,7 @@ The released **FG-VLM-4B-Thinking** checkpoint (a Yanghu-pond, 10-species model)
 loop in [Quick Start](#quick-start-end-to-end); download it with:
 
 ```bash
-huggingface-cli download yanglei18/Bioinspired-Molecular-Visual-Monitoring-of-Invasive-Fishes \
+huggingface-cli download yanglei18/Bioinspired-Molecular-Visual-Surveillance-of-Invasive-Fishes \
   checkpoints/FG-VLM-4B-Thinking.zip --repo-type dataset --local-dir ./
 unzip checkpoints/FG-VLM-4B-Thinking.zip -d checkpoints/   # -> checkpoints/FG-VLM-4B-Thinking/
 ```
@@ -130,8 +134,7 @@ bash open_world_filter/scripts/inference_script.sh open_world_filter/configs/inv
 #    answers can be fed back in step 5).
 python3 evidence_grounded_reasoner/eval/generate_benchmark.py \
   --video-dir work_dirs/extraction_output/instance_video --output benchmark.json \
-  --options "black carp" "chinese labeo" "chinese sucker" "redeye barbel" "serrated barb" \
-            "common carp" "chinese paddlefish" "mud carp" "schizothorax fish" "wuchang bream"
+  --species-set yanghu   # the 10 Yanghu-pond species (preset); use --options for a custom list
 bash evidence_grounded_reasoner/eval/run_eval_pipeline.sh checkpoints/FG-VLM-4B-Thinking \
   --benchmark-file benchmark.json --run-dir ./eval_output
 #    -> eval_output/res.json   (per-clip answers: <answer>(X) species ...</answer>)
@@ -155,7 +158,7 @@ data — they are not part of the Yanghu feedback loop above. See each module's 
 ## License
 
 Released under the [MIT License](LICENSE). Copyright (c) 2026 the authors of *"Bioinspired
-molecular–visual monitoring of invasive fishes"*. The MIT license covers the **code** in this
+molecular–visual surveillance of invasive fishes"*. The MIT license covers the **code** in this
 repository; released **model weights** are derived from Qwen3-VL and additionally inherit the
 upstream Qwen3-VL model license. Please also follow the licenses of the upstream projects listed
 under Acknowledgements.
@@ -165,9 +168,12 @@ under Acknowledgements.
 If you use this code in academic work, please cite the associated paper:
 
 ```bibtex
-@article{invasive_fish_monitoring_2026,
-  title   = {Bioinspired molecular--visual monitoring of invasive fishes},
-  author  = {Li, Lei and Li, Yanyu and Yang, Lei and Yu, Junzhi and He, Dekui and Lv, Chen and others},
+@article{invasive_fish_surveillance_2026,
+  title   = {Bioinspired molecular--visual surveillance of invasive fishes},
+  author  = {Li, Lei and Li, Yanyu and Yang, Lei and Gao, Wenzhuo and Qin, Boyang and Wu, Kai and
+             Wang, Shengzhi and Wang, Bo and Zhang, Yiyuan and Ding, Liuyong and Qian, Jianshuo and
+             Kong, Shihan and Wang, Jian and Chen, Xingyu and Xin, Zhanhua and Lv, Chen and
+             He, Dekui and Yu, Junzhi},
   year    = {2026},
   note    = {Under review. Lei Li, Yanyu Li and Lei Yang contributed equally (co-first authors); Chen Lv, Dekui He and Junzhi Yu are co-corresponding authors. Venue and DOI to be added upon publication}
 }
